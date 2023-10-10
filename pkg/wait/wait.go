@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+var errWrongDuration = errors.New(
+	"failed to wait: min time duration greater than max time duration",
+)
+
 func Wait(ctx context.Context, d time.Duration) error {
 	if d <= 0 {
 		return nil
@@ -42,10 +46,20 @@ func WaitCh[T any](ctx context.Context, ch <-chan T) error {
 
 func WaitRand(ctx context.Context, minD, maxD time.Duration) error {
 	if minD > maxD {
-		return errors.New("failed to wait: min time duration greater than max time duration")
+		return errWrongDuration
 	}
 
 	ms := minD.Milliseconds() + int64(rand.Intn(int(maxD.Milliseconds()-minD.Milliseconds())+1))
 
 	return Wait(ctx, time.Duration(ms*int64(time.Millisecond)))
+}
+
+func WaitRandMs(ctx context.Context, minMs, maxMs int) error {
+	if minMs > maxMs {
+		return errWrongDuration
+	}
+
+	ms := minMs + rand.Intn(maxMs-minMs+1)
+
+	return Wait(ctx, time.Millisecond*time.Duration(ms))
 }
