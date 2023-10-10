@@ -6,37 +6,30 @@ import (
 )
 
 func Wait(ctx context.Context, d time.Duration) error {
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	default:
-	}
-
 	timer := time.NewTimer(d)
 	defer timer.Stop()
 
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-timer.C:
-		return nil
-	}
+	return WaitCh(ctx, timer.C)
 }
 
 func WaitTo(ctx context.Context, t time.Time) error {
+	timer := time.NewTimer(time.Until(t))
+	defer timer.Stop()
+
+	return WaitCh(ctx, timer.C)
+}
+
+func WaitCh[T any](ctx context.Context, ch <-chan T) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}
 
-	timer := time.NewTimer(time.Until(t))
-	defer timer.Stop()
-
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
-	case <-timer.C:
+	case <-ch:
 		return nil
 	}
 }
