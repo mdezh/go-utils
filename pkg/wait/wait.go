@@ -17,16 +17,17 @@ func Wait(ctx context.Context, d time.Duration) error {
 	}
 
 	timer := time.NewTimer(d)
-	defer timer.Stop()
+	defer func() {
+		if !timer.Stop() {
+			<-timer.C
+		}
+	}()
 
 	return WaitCh(ctx, timer.C)
 }
 
 func WaitTo(ctx context.Context, t time.Time) error {
-	timer := time.NewTimer(time.Until(t))
-	defer timer.Stop()
-
-	return WaitCh(ctx, timer.C)
+	return Wait(ctx, time.Until(t))
 }
 
 func WaitCh[T any](ctx context.Context, ch <-chan T) error {
