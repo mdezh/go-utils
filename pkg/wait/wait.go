@@ -49,9 +49,9 @@ func WaitRand(ctx context.Context, minD, maxD time.Duration) error {
 		return errWrongDuration
 	}
 
-	ms := minD.Milliseconds() + int64(rand.Intn(int(maxD.Milliseconds()-minD.Milliseconds())+1))
+	ns := minD.Nanoseconds() + int64(rand.Intn(int(maxD.Nanoseconds()-minD.Nanoseconds())+1))
 
-	return Wait(ctx, time.Duration(ms*int64(time.Millisecond)))
+	return Wait(ctx, time.Duration(ns))
 }
 
 func WaitRandMs(ctx context.Context, minMs, maxMs int) error {
