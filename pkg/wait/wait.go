@@ -19,7 +19,10 @@ func Wait(ctx context.Context, d time.Duration) error {
 	timer := time.NewTimer(d)
 	defer func() {
 		if !timer.Stop() {
-			<-timer.C
+			select {
+			case <-timer.C:
+			default:
+			}
 		}
 	}()
 
